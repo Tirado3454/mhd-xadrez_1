@@ -76,6 +76,22 @@ if st.button("Atualizar Tabuleiro com FEN"):
     except ValueError:
         st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
 
+# Editor manual de tabuleiro (após FEN)
+st.markdown("### Editor Manual do Tabuleiro")
+peca = st.selectbox("Selecione a peça para adicionar", ["", "p", "P", "r", "R", "n", "N", "b", "B", "q", "Q", "k", "K"], key="peca_selecionada")
+coordenada = st.text_input("Insira a coordenada (ex: e4):", key="coordenada_peca")
+
+if st.button("Adicionar Peça ao Tabuleiro"):
+    if peca and coordenada:
+        try:
+            square = chess.parse_square(coordenada)
+            st.session_state.current_board.set_piece_at(square, chess.Piece.from_symbol(peca))
+            st.success(f"Peça '{peca}' adicionada na coordenada '{coordenada}'!")
+        except (ValueError, KeyError):
+            st.error("Coordenada ou peça inválida. Por favor, tente novamente.")
+    else:
+        st.error("Selecione uma peça e insira uma coordenada.")
+
 # Visualizar tabuleiro configurado
 st.markdown("### Tabuleiro Atual")
 st.image(render_tabuleiro_customizado(st.session_state.current_board), use_container_width=True)
@@ -102,4 +118,3 @@ if not st.session_state.mhd_data.empty:
     )
 else:
     st.info("Nenhum dado disponível para exportação.")
-
