@@ -1,19 +1,19 @@
 import streamlit as st
 import pandas as pd
 
-# Definição das perguntas por etapa
+# DefiniÃ§Ã£o das perguntas por etapa
 perguntas = {
-    "Base Teórica": "Quais são os fundamentos teóricos que embasam sua análise?",
-    "Hipótese": "Qual é a hipótese que você deseja testar?",
-    "Consequências": "Quais consequências são esperadas se a hipótese for verdadeira?",
-    "Experimento": "Como você pretende testar sua hipótese?",
-    "Observações": "Quais foram os resultados observados?",
-    "Avaliação": "Como você avalia os resultados em relação à hipótese inicial?"
+    "Base TeÃ³rica": "Quais sÃ£o os fundamentos teÃ³ricos que embasam sua anÃ¡lise?",
+    "HipÃ³tese": "Qual Ã© a hipÃ³tese que vocÃª deseja testar?",
+    "ConsequÃªncias": "Quais consequÃªncias sÃ£o esperadas se a hipÃ³tese for verdadeira?",
+    "Experimento": "Como vocÃª pretende testar sua hipÃ³tese?",
+    "ObservaÃ§Ãµes": "Quais foram os resultados observados?",
+    "AvaliaÃ§Ã£o": "Como vocÃª avalia os resultados em relaÃ§Ã£o Ã  hipÃ³tese inicial?"
 }
 
-# Inicialização do estado da aplicação
+# InicializaÃ§Ã£o do estado da aplicaÃ§Ã£o
 if "mhd_data" not in st.session_state:
-    st.session_state.mhd_data = pd.DataFrame(columns=["Etapa", "Descrição", "FEN"])
+    st.session_state.mhd_data = pd.DataFrame(columns=["Etapa", "DescriÃ§Ã£o", "FEN"])
 
 if "descricao_etapa" not in st.session_state:
     st.session_state.descricao_etapa = ""
@@ -26,7 +26,7 @@ if "current_board" not in st.session_state:
 etapa_selecionada = st.selectbox("Selecione a Etapa", list(perguntas.keys()), key="etapa_selecionada")
 st.write(f"**Dica:** {perguntas[etapa_selecionada]}")
 
-# Formulário para adicionar nova etapa
+# FormulÃ¡rio para adicionar nova etapa
 with st.form("mhd_form"):
     descricao = st.text_area("Descreva a etapa:", height=100, key="descricao_etapa")
     submitted = st.form_submit_button("Adicionar Etapa")
@@ -34,14 +34,14 @@ with st.form("mhd_form"):
         if descricao.strip():
             nova_entrada = pd.DataFrame({
                 "Etapa": [etapa_selecionada],
-                "Descrição": [descricao],
+                "DescriÃ§Ã£o": [descricao],
                 "FEN": [st.session_state.current_board.fen()]
             })
             st.session_state.mhd_data = pd.concat([st.session_state.mhd_data, nova_entrada], ignore_index=True)
-            st.session_state["descricao_etapa"] = ""  # Limpar o campo de descrição
+            st.session_state["descricao_etapa"] = ""  # Limpar o campo de descriÃ§Ã£o
             st.success(f"Etapa '{etapa_selecionada}' adicionada com sucesso!")
         else:
-            st.error("A descrição não pode estar vazia!")
+            st.error("A descriÃ§Ã£o nÃ£o pode estar vazia!")
 
 # Exibir dados adicionados
 st.write("### Etapas Adicionadas")
