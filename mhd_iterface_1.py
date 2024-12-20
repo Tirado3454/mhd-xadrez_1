@@ -7,7 +7,7 @@ import chess.svg
 # Configuração inicial da interface
 st.set_page_config(page_title="Modelo Hipotético-Dedutivo no Xadrez", layout="centered")
 st.title("♟️ Modelo Hipotético-Dedutivo no Xadrez")
-st.write("Preencha as etapas do método para organizar suas jogadas e estratégias e visualize o tabuleiro.")
+st.write("Preencha as etapas do método para organizar suas jogadas e estratégias e visualize ou configure o tabuleiro.")
 
 # Inicialização da tabela de dados
 if "mhd_data" not in st.session_state:
@@ -26,6 +26,16 @@ perguntas = {
     "Observações": "O que aconteceu após a jogada? O resultado foi o esperado?",
     "Avaliação": "A hipótese inicial foi confirmada, ajustada ou refutada? Por quê?"
 }
+
+# Configuração inicial do tabuleiro
+st.markdown("### Configuração do Tabuleiro")
+fen_input = st.text_input("Insira a notação FEN para configurar o tabuleiro:", st.session_state.current_board.fen())
+if st.button("Atualizar Tabuleiro com FEN"):
+    try:
+        st.session_state.current_board.set_fen(fen_input)
+        st.success("Tabuleiro atualizado com sucesso!")
+    except ValueError:
+        st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
 
 # Formulário para entrada dos dados
 with st.form("mhd_form"):
