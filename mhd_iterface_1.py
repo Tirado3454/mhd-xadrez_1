@@ -22,8 +22,8 @@ def render_tabuleiro_customizado(board):
         board=board, 
         size=320,  # Reduzindo o tamanho do tabuleiro (20% menor)
         style="""
-            .square { fill: #d4f7d4; }  /* Cor verde claro para casas brancas */
-            .square.black { fill: #a3c3a3; }  /* Verde mais escuro para casas pretas */
+            .square.light { fill: #ffffff; }  /* Casas claras em branco */
+            .square.dark { fill: #8FBC8F; }  /* Casas escuras em verde */
         """
     )
 
