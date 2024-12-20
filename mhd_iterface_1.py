@@ -16,6 +16,16 @@ if "mhd_data" not in st.session_state:
 if "current_board" not in st.session_state:
     st.session_state.current_board = chess.Board()
 
+# Perguntas norteadoras para cada etapa do MHD
+perguntas = {
+    "Base Teórica": "Qual é a base de conhecimento ou estratégia que será usada como referência?",
+    "Hipótese": "O que você espera alcançar com uma jogada ou sequência de jogadas?",
+    "Consequências": "Quais reações ou respostas você espera do adversário?",
+    "Experimento": "Qual jogada ou sequência será aplicada para testar sua hipótese?",
+    "Observações": "O que aconteceu após a jogada? O resultado foi o esperado?",
+    "Avaliação": "A hipótese inicial foi confirmada, ajustada ou refutada? Por quê?"
+}
+
 # Função para renderizar o tabuleiro com estilo customizado
 def render_tabuleiro_customizado(board):
     return chess.svg.board(
@@ -44,7 +54,8 @@ if st.button("Atualizar Tabuleiro com FEN"):
 # Formulário para entrada dos dados
 st.markdown("### Adicionar Nova Etapa")
 with st.form("mhd_form"):
-    etapa = st.selectbox("Selecione a Etapa", ["Base Teórica", "Hipótese", "Consequências", "Experimento", "Observações", "Avaliação"])
+    etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()))
+    st.markdown(f"**Dica:** {perguntas[etapa]}")  # Exibe a pergunta norteadora
     descricao = st.text_area("Descreva a etapa:", height=100)
 
     # Visualizar tabuleiro configurado
