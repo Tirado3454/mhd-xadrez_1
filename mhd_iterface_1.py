@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import chess
 import chess.svg
 
@@ -17,9 +16,12 @@ if "mhd_data" not in st.session_state:
 if "current_board" not in st.session_state:
     st.session_state.current_board = chess.Board()
 
-# Configuração inicial do tabuleiro com FEN
+# Configuração do tabuleiro com FEN
 st.markdown("### Configuração do Tabuleiro")
-fen_input = st.text_input("Insira a notação FEN para configurar o tabuleiro:", st.session_state.current_board.fen())
+fen_input = st.text_input(
+    "Insira a notação FEN para configurar o tabuleiro:", 
+    value=st.session_state.current_board.fen()
+)
 
 if st.button("Atualizar Tabuleiro com FEN"):
     try:
@@ -29,6 +31,7 @@ if st.button("Atualizar Tabuleiro com FEN"):
         st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
 
 # Formulário para entrada dos dados
+st.markdown("### Adicionar Nova Etapa")
 with st.form("mhd_form"):
     etapa = st.selectbox("Selecione a Etapa", ["Base Teórica", "Hipótese", "Consequências", "Experimento", "Observações", "Avaliação"])
     descricao = st.text_area("Descreva a etapa:", height=100)
