@@ -1,126 +1,50 @@
 import streamlit as st
-import pandas as pd
-import chess
-import chess.svg
 
-# Configuração inicial da interface
-st.set_page_config(page_title="Modelo Hipotético-Dedutivo no Xadrez", layout="centered")
-st.markdown("""<h1 style='font-size:32px; display: flex; align-items: center;'>
-<img src='data:image/png;base64,<insira_o_base64_gerado_da_logo_aqui>' style='height:50px; margin-right:10px;'> Modelo Hipotético-Dedutivo no Xadrez
-</h1>""", unsafe_allow_html=True)
-st.write("Configure e salve posições personalizadas no tabuleiro.")
+# Inicializar o session_state para descricao_etapa
+if "descricao_etapa" not in st.session_state:
+    st.session_state["descricao_etapa"] = ""
 
-# Inicialização da tabela de dados
-if "mhd_data" not in st.session_state:
-    st.session_state.mhd_data = pd.DataFrame(columns=["Etapa", "Descrição", "FEN"])
+# Inicializar o session_state para etapas
+if "etapas" not in st.session_state:
+    st.session_state["etapas"] = []
 
-# Inicialização do tabuleiro
-if "current_board" not in st.session_state:
-    st.session_state.current_board = chess.Board()
+st.title("Modelo Hipotético-Dedutivo no Xadrez")
 
-# Perguntas norteadoras para cada etapa do MHD
-perguntas = {
-    "Base Teórica": "Qual é a base de conhecimento ou estratégia que será usada como referência?",
-    "Hipótese": "O que você espera alcançar com uma jogada ou sequência de jogadas?",
-    "Consequências": "Quais reações ou respostas você espera do adversário?",
-    "Experimento": "Qual jogada ou sequência será aplicada para testar sua hipótese?",
-    "Observações": "O que aconteceu após a jogada? O resultado foi o esperado?",
-    "Avaliação": "A hipótese inicial foi confirmada, ajustada ou refutada? Por quê?"
+# Dicionário de tópicos e dicas
+topicos_e_dicas = {
+    "Base Teórica": "Descreva as bases teóricas do problema que você está investigando.",
+    "Hipótese": "Formule uma hipótese clara e objetiva para o problema.",
+    "Consequências": "Identifique as consequências que derivam da hipótese formulada.",
+    "Experimento": "Descreva como o experimento será conduzido para testar a hipótese.",
+    "Observações": "Registre suas observações durante ou após o experimento.",
+    "Avaliação": "Avalie os resultados obtidos e conclua se a hipótese foi confirmada ou refutada."
 }
 
-# Função para renderizar o tabuleiro com estilo customizado
-def render_tabuleiro_customizado(board):
-    return chess.svg.board(
-        board=board, 
-        size=320,  # Reduzindo o tamanho do tabuleiro (20% menor)
-        style="""
-            .square.light { fill: #ffffff; }  /* Casas claras em branco */
-            .square.dark { fill: #8FBC8F; }  /* Casas escuras em verde */
-        """
-    )
+# Seleção de tópico
+topico_selecionado = st.selectbox("Selecione o tópico da etapa", options=list(topicos_e_dicas.keys()))
 
-# Adicionar nova etapa
-st.markdown("### Adicionar Nova Etapa")
+# Exibir a dica correspondente ao tópico selecionado
+if topico_selecionado:
+    st.info(topicos_e_dicas[topico_selecionado])
 
-def atualizar_dica():
-    etapa_atual = st.session_state.etapa_selecionada
-    st.session_state.dica_atual = perguntas[etapa_atual]
+# Campo de descrição da etapa
+descricao_etapa = st.text_area("Descreva a etapa", value=st.session_state["descricao_etapa"])
 
-if "dica_atual" not in st.session_state:
-    st.session_state.dica_atual = perguntas["Base Teórica"]
-
-etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()), key="etapa_selecionada", on_change=atualizar_dica)
-st.markdown(f"**Dica:** {st.session_state.dica_atual}")
-
-descricao = st.text_area("Descreva a etapa:", height=100, key="descricao_etapa")
-
+# Botão para adicionar etapa
 if st.button("Adicionar Etapa"):
-    if descricao.strip():
-        nova_entrada = pd.DataFrame({
-            "Etapa": [etapa],
-            "Descrição": [descricao],
-            "FEN": [st.session_state.current_board.fen()]
-        })
-        st.session_state.mhd_data = pd.concat([st.session_state.mhd_data, nova_entrada], ignore_index=True)
+    if topico_selecionado and descricao_etapa:
+        st.session_state.etapas.append({"etapa": topico_selecionado, "descricao": descricao_etapa})
         st.session_state["descricao_etapa"] = ""  # Limpar o campo de descrição
-        st.success(f"Etapa '{etapa}' adicionada com sucesso!")
+        st.success(f"Etapa '{topico_selecionado}' adicionada com sucesso!")
     else:
-        st.error("A descrição não pode estar vazia!")
+        st.error("Por favor, selecione um tópico e preencha a descrição da etapa.")
 
-# Configuração do tabuleiro com FEN
-st.markdown("### Configuração do Tabuleiro")
-fen_input = st.text_input(
-    "Insira a notação FEN para configurar o tabuleiro:", 
-    value=st.session_state.current_board.fen(),
-    key="fen_input"
-)
+# Exibir as etapas adicionadas
+if st.session_state.etapas:
+    st.subheader("Etapas Adicionadas")
+    for idx, etapa in enumerate(st.session_state.etapas):
+        st.write(f"**{idx + 1}. {etapa['etapa']}**: {etapa['descricao']}")
 
-if st.button("Atualizar Tabuleiro com FEN"):
-    try:
-        st.session_state.current_board.set_fen(fen_input)
-        st.success("Tabuleiro atualizado com sucesso!")
-    except ValueError:
-        st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
+# Placeholder para adicionar outras funcionalidades futuras
+st.write("\n")
 
-# Editor manual de tabuleiro (após FEN)
-st.markdown("### Editor Manual do Tabuleiro")
-peca = st.selectbox("Selecione a peça para adicionar", ["", "p", "P", "r", "R", "n", "N", "b", "B", "q", "Q", "k", "K"], key="peca_selecionada")
-coordenada = st.text_input("Insira a coordenada (ex: e4):", key="coordenada_peca")
-
-if st.button("Adicionar Peça ao Tabuleiro"):
-    if peca and coordenada:
-        try:
-            square = chess.parse_square(coordenada)
-            st.session_state.current_board.set_piece_at(square, chess.Piece.from_symbol(peca))
-            st.success(f"Peça '{peca}' adicionada na coordenada '{coordenada}'!")
-        except (ValueError, KeyError):
-            st.error("Coordenada ou peça inválida. Por favor, tente novamente.")
-    else:
-        st.error("Selecione uma peça e insira uma coordenada.")
-
-# Visualizar tabuleiro configurado
-st.markdown("### Tabuleiro Atual")
-st.image(render_tabuleiro_customizado(st.session_state.current_board), use_container_width=True)
-
-# Exibição da tabela dinâmica
-st.subheader("Tabela do Modelo Hipotético-Dedutivo")
-if not st.session_state.mhd_data.empty:
-    for index, row in st.session_state.mhd_data.iterrows():
-        st.markdown(f"**Etapa:** {row['Etapa']}")
-        st.markdown(f"**Descrição:** {row['Descrição']}")
-        st.image(render_tabuleiro_customizado(chess.Board(row['FEN'])), use_container_width=True)
-else:
-    st.info("Nenhuma etapa adicionada ainda.")
-
-# Exportar a tabela para CSV
-st.markdown("### Exportação de Dados")
-if not st.session_state.mhd_data.empty:
-    csv_data = st.session_state.mhd_data.to_csv(index=False)
-    st.download_button(
-        label="Baixar Tabela como CSV",
-        data=csv_data,
-        file_name="mhd_xadrez.csv",
-        mime="text/csv"
-    )
-else:
-    st.info("Nenhum dado disponível para exportação.")
