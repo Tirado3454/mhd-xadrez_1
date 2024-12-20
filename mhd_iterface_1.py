@@ -5,7 +5,9 @@ import chess.svg
 
 # Configuração inicial da interface
 st.set_page_config(page_title="Modelo Hipotético-Dedutivo no Xadrez", layout="centered")
-st.markdown("<h1 style='font-size:32px;'>♟️ Modelo Hipotético-Dedutivo no Xadrez</h1>", unsafe_allow_html=True)
+st.markdown("""<h1 style='font-size:32px; display: flex; align-items: center;'>
+<img src='data:image/png;base64,<base64_logo>' style='height:50px; margin-right:10px;'> Modelo Hipotético-Dedutivo no Xadrez
+</h1>""", unsafe_allow_html=True)
 st.write("Configure e salve posições personalizadas no tabuleiro.")
 
 # Inicialização da tabela de dados
