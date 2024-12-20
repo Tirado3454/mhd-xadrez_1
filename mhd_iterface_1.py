@@ -39,30 +39,12 @@ def render_tabuleiro_customizado(board):
         """
     )
 
-# Configuração do tabuleiro com FEN
-st.markdown("### Configuração do Tabuleiro")
-fen_input = st.text_input(
-    "Insira a notação FEN para configurar o tabuleiro:", 
-    value=st.session_state.current_board.fen()
-)
-
-if st.button("Atualizar Tabuleiro com FEN"):
-    try:
-        st.session_state.current_board.set_fen(fen_input)
-        st.success("Tabuleiro atualizado com sucesso!")
-    except ValueError:
-        st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
-
 # Formulário para entrada dos dados
 st.markdown("### Adicionar Nova Etapa")
 with st.form("mhd_form"):
-    etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()))
-    st.markdown(f"**Dica:** {perguntas[etapa]}")  # Atualiza a dica dinamicamente com base na seleção
-    descricao = st.text_area("Descreva a etapa:", height=100)
-
-    # Visualizar tabuleiro configurado
-    st.markdown("### Tabuleiro Atual")
-    st.image(render_tabuleiro_customizado(st.session_state.current_board), use_container_width=True)
+    etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()), key="etapa_selecionada")
+    st.markdown(f"**Dica:** {perguntas[etapa]}")
+    descricao = st.text_area("Descreva a etapa:", key="descricao_etapa", height=100)
 
     submitted = st.form_submit_button("Adicionar Etapa")
     if submitted:
@@ -74,8 +56,25 @@ with st.form("mhd_form"):
             })
             st.session_state.mhd_data = pd.concat([st.session_state.mhd_data, nova_entrada], ignore_index=True)
             st.success(f"Etapa '{etapa}' adicionada com sucesso!")
+            # Limpa o campo de descrição após adicionar a etapa
+            st.session_state.descricao_etapa = ""
         else:
             st.error("A descrição não pode estar vazia!")
+
+# Configuração do tabuleiro com FEN
+st.markdown("### Configuração do Tabuleiro")
+fen_input = st.text_input(
+    "Insira a notação FEN para configurar o tabuleiro:", 
+    value=st.session_state.current_board.fen(),
+    key="fen_input"
+)
+
+if st.button("Atualizar Tabuleiro com FEN"):
+    try:
+        st.session_state.current_board.set_fen(fen_input)
+        st.success("Tabuleiro atualizado com sucesso!")
+    except ValueError:
+        st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
 
 # Exibição da tabela dinâmica
 st.subheader("Tabela do Modelo Hipotético-Dedutivo")
@@ -83,7 +82,7 @@ if not st.session_state.mhd_data.empty:
     for index, row in st.session_state.mhd_data.iterrows():
         st.markdown(f"**Etapa:** {row['Etapa']}")
         st.markdown(f"**Descrição:** {row['Descrição']}")
-        st.image(render_tabuleiro_customizado(chess.Board(row['FEN'])), use_column_width=True)
+        st.image(render_tabuleiro_customizado(chess.Board(row['FEN'])), use_container_width=True)
 else:
     st.info("Nenhuma etapa adicionada ainda.")
 
