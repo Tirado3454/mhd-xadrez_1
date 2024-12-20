@@ -88,9 +88,13 @@ if not st.session_state.mhd_data.empty:
     st.plotly_chart(grafico, use_container_width=True)
 
 # Exportar a tabela para CSV
-st.download_button(
-    label="Baixar Tabela como CSV",
-    data=st.session_state.mhd_data.to_csv(index=False),
-    file_name="mhd_xadrez.csv",
-    mime="text/csv"
-)
+if not st.session_state.mhd_data.empty:
+    csv_data = st.session_state.mhd_data.to_csv(index=False)
+    st.download_button(
+        label="Baixar Tabela como CSV",
+        data=csv_data,
+        file_name="mhd_xadrez.csv",
+        mime="text/csv"
+    )
+else:
+    st.info("Nenhum dado disponível para exportação.")
