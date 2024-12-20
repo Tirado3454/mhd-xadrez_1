@@ -5,7 +5,7 @@ import chess.svg
 
 # Configuração inicial da interface
 st.set_page_config(page_title="Modelo Hipotético-Dedutivo no Xadrez", layout="centered")
-st.title("Modelo Hipotético-Dedutivo no Xadrez")
+st.title("♟️ MHD no Xadrez")
 st.write("Configure e salve posições personalizadas no tabuleiro.")
 
 # Inicialização da tabela de dados
