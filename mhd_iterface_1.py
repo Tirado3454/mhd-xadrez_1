@@ -1,101 +1,54 @@
 import streamlit as st
-import pandas as pd
 import chess
 import chess.svg
 
 # Configuração inicial da interface
 st.set_page_config(page_title="Modelo Hipotético-Dedutivo no Xadrez", layout="centered")
-st.markdown("""<h1 style='font-size:32px; display: flex; align-items: center;'>
-<img src='data:image/png;base64,<insira_o_base64_gerado_da_logo_aqui>' style='height:50px; margin-right:10px;'> Modelo Hipotético-Dedutivo no Xadrez
-</h1>""", unsafe_allow_html=True)
-st.write("Configure e salve posições personalizadas no tabuleiro.")
 
-# Inicialização da tabela de dados
-if "mhd_data" not in st.session_state:
-    st.session_state.mhd_data = pd.DataFrame(columns=["Etapa", "Descrição", "FEN"])
+# Variáveis de estado
+if "selected_topic" not in st.session_state:
+    st.session_state.selected_topic = None
+if "board_rendered" not in st.session_state:
+    st.session_state.board_rendered = False
+if "steps_description" not in st.session_state:
+    st.session_state.steps_description = ""
 
-# Inicialização do tabuleiro
-if "current_board" not in st.session_state:
-    st.session_state.current_board = chess.Board()
+# Função para renderizar o tabuleiro
+@st.cache_data
+def render_chess_board():
+    board = chess.Board()
+    return chess.svg.board(board)
 
-# Perguntas norteadoras para cada etapa do MHD
-perguntas = {
-    "Base Teórica": "Qual é a base de conhecimento ou estratégia que será usada como referência?",
-    "Hipótese": "O que você espera alcançar com uma jogada ou sequência de jogadas?",
-    "Consequências": "Quais reações ou respostas você espera do adversário?",
-    "Experimento": "Qual jogada ou sequência será aplicada para testar sua hipótese?",
-    "Observações": "O que aconteceu após a jogada? O resultado foi o esperado?",
-    "Avaliação": "A hipótese inicial foi confirmada, ajustada ou refutada? Por quê?"
-}
+# Tópicos disponíveis
+topics = ["Aberturas", "Táticas", "Finais"]
 
-# Função para renderizar o tabuleiro com estilo customizado
-def render_tabuleiro_customizado(board):
-    return chess.svg.board(
-        board=board, 
-        size=320,  # Reduzindo o tamanho do tabuleiro (20% menor)
-        style="""
-            .square.light { fill: #ffffff; }  /* Casas claras em branco */
-            .square.dark { fill: #8FBC8F; }  /* Casas escuras em verde */
-        """
-    )
+# Layout principal
+st.title("Modelo Hipotético-Dedutivo no Xadrez")
 
-# Configuração do tabuleiro com FEN
-st.markdown("### Configuração do Tabuleiro")
-fen_input = st.text_input(
-    "Insira a notação FEN para configurar o tabuleiro:", 
-    value=st.session_state.current_board.fen()
-)
+# Seletor de tópicos
+selected_topic = st.selectbox("Escolha o tópico:", topics, key="topic_selector")
 
-if st.button("Atualizar Tabuleiro com FEN"):
-    try:
-        st.session_state.current_board.set_fen(fen_input)
-        st.success("Tabuleiro atualizado com sucesso!")
-    except ValueError:
-        st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
+# Atualização das dicas ao mudar de tópico
+if selected_topic != st.session_state.selected_topic:
+    st.session_state.selected_topic = selected_topic
+    st.session_state.steps_description = ""  # Limpa o campo de descrição
 
-# Formulário para entrada dos dados
-st.markdown("### Adicionar Nova Etapa")
-with st.form("mhd_form"):
-    etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()))
-    st.markdown(f"**Dica:** {perguntas[etapa]}")  # Atualiza a dica dinamicamente com base na seleção
-    descricao = st.text_area("Descreva a etapa:", height=100)
+    # Dicas dinâmicas com base no tópico
+    if selected_topic == "Aberturas":
+        st.info("Dica: Concentre-se no controle do centro e no desenvolvimento rápido de peças.")
+    elif selected_topic == "Táticas":
+        st.info("Dica: Procure por táticas como garfos, cravadas e raios-X.")
+    elif selected_topic == "Finais":
+        st.info("Dica: Estude padrões básicos de xeque-mate e a importância da oposição.")
 
-    # Visualizar tabuleiro configurado
-    st.markdown("### Tabuleiro Atual")
-    st.image(render_tabuleiro_customizado(st.session_state.current_board), use_container_width=True)
+# Campo de entrada para descrição das etapas
+steps_description = st.text_area("Descreva as etapas:", value=st.session_state.steps_description, key="steps_description_input")
+st.session_state.steps_description = steps_description
 
-    submitted = st.form_submit_button("Adicionar Etapa")
-    if submitted:
-        if descricao.strip():
-            nova_entrada = pd.DataFrame({
-                "Etapa": [etapa],
-                "Descrição": [descricao],
-                "FEN": [st.session_state.current_board.fen()]
-            })
-            st.session_state.mhd_data = pd.concat([st.session_state.mhd_data, nova_entrada], ignore_index=True)
-            st.success(f"Etapa '{etapa}' adicionada com sucesso!")
-        else:
-            st.error("A descrição não pode estar vazia!")
+# Botão para adicionar etapas
+if st.button("Adicionar Etapas"):
+    st.success("Etapas adicionadas com sucesso!")
 
-# Exibição da tabela dinâmica
-st.subheader("Tabela do Modelo Hipotético-Dedutivo")
-if not st.session_state.mhd_data.empty:
-    for index, row in st.session_state.mhd_data.iterrows():
-        st.markdown(f"**Etapa:** {row['Etapa']}")
-        st.markdown(f"**Descrição:** {row['Descrição']}")
-        st.image(render_tabuleiro_customizado(chess.Board(row['FEN'])), use_column_width=True)
-else:
-    st.info("Nenhuma etapa adicionada ainda.")
-
-# Exportar a tabela para CSV
-st.markdown("### Exportação de Dados")
-if not st.session_state.mhd_data.empty:
-    csv_data = st.session_state.mhd_data.to_csv(index=False)
-    st.download_button(
-        label="Baixar Tabela como CSV",
-        data=csv_data,
-        file_name="mhd_xadrez.csv",
-        mime="text/csv"
-    )
-else:
-    st.info("Nenhum dado disponível para exportação.")
+    # Renderiza o tabuleiro apenas ao adicionar etapas
+    st.image(render_chess_board(), use_column_width=True)
+    st.session_state.board_rendered = True
