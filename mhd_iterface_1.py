@@ -60,30 +60,23 @@ st.sidebar.text_area(
 # Botão para adicionar nova etapa
 st.sidebar.button("Adicionar Etapa", on_click=adicionar_etapa)
 
+# Configuração do tabuleiro
+st.subheader("Configuração do Tabuleiro")
+fen_input = st.text_input("Configuração FEN:", value=st.session_state.fen)
+if st.button("Atualizar Tabuleiro com FEN"):
+    try:
+        board = chess.Board(fen_input)
+        st.session_state.fen = fen_input
+    except ValueError:
+        st.error("FEN inválido. Por favor, tente novamente.")
 
-    # Visualizar tabuleiro configurado
-    st.markdown("### Tabuleiro Atual")
-    st.image(render_tabuleiro_customizado(st.session_state.current_board), use_container_width=True)
+# Exibição do tabuleiro atual
+st.subheader("Tabuleiro Atual")
+chessboard(fen=st.session_state.fen, key="tabuleiro_atual")
 
-# ExibiÃ§Ã£o da tabela dinÃ¢mica
-st.subheader("Tabela do Modelo HipotÃ©tico-Dedutivo")
-if not st.session_state.mhd_data.empty:
-    for index, row in st.session_state.mhd_data.iterrows():
-        st.markdown(f"**Etapa:** {row['Etapa']}")
-        st.markdown(f"**DescriÃ§Ã£o:** {row['DescriÃ§Ã£o']}")
-        st.image(render_tabuleiro_customizado(chess.Board(row['FEN'])), use_container_width=True)
-else:
-    st.info("Nenhuma etapa adicionada ainda.")
-
-# Exportar a tabela para CSV
-st.markdown("### ExportaÃ§Ã£o de Dados")
-if not st.session_state.mhd_data.empty:
-    csv_data = st.session_state.mhd_data.to_csv(index=False)
-    st.download_button(
-        label="Baixar Tabela como CSV",
-        data=csv_data,
-        file_name="mhd_xadrez.csv",
-        mime="text/csv"
-    )
-else:
-    st.info("Nenhum dado disponÃ­vel para exportaÃ§Ã£o.")
+# Exibição das etapas adicionadas
+st.subheader("Etapas Adicionadas")
+for idx, etapa in enumerate(st.session_state.etapas):
+    st.markdown(f"**Etapa {idx + 1}: {etapa['etapa']}**")
+    st.text(f"Descrição: {etapa['descricao']}")
+    st.text(f"FEN: {etapa['fen']}")
