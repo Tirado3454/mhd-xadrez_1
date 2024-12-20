@@ -16,6 +16,17 @@ if "mhd_data" not in st.session_state:
 if "current_board" not in st.session_state:
     st.session_state.current_board = chess.Board()
 
+# Função para renderizar o tabuleiro com estilo customizado
+def render_tabuleiro_customizado(board):
+    return chess.svg.board(
+        board=board, 
+        size=320,  # Reduzindo o tamanho do tabuleiro (20% menor)
+        style="""
+            .square { fill: #d4f7d4; }  /* Cor verde claro para casas brancas */
+            .square.black { fill: #a3c3a3; }  /* Verde mais escuro para casas pretas */
+        """
+    )
+
 # Configuração do tabuleiro com FEN
 st.markdown("### Configuração do Tabuleiro")
 fen_input = st.text_input(
@@ -29,15 +40,6 @@ if st.button("Atualizar Tabuleiro com FEN"):
         st.success("Tabuleiro atualizado com sucesso!")
     except ValueError:
         st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
-
-# Função para renderizar tabuleiro com estilo customizado
-def render_tabuleiro_customizado(board):
-    svg = chess.svg.board(
-        board=board, 
-        size=320,  # Reduzindo o tamanho do tabuleiro (20% menor)
-        style=".square { fill: #d4f7d4; } .square.black { fill: #a3c3a3; }"
-    )
-    return svg
 
 # Formulário para entrada dos dados
 st.markdown("### Adicionar Nova Etapa")
@@ -73,10 +75,14 @@ else:
     st.info("Nenhuma etapa adicionada ainda.")
 
 # Exportar a tabela para CSV
+st.markdown("### Exportação de Dados")
 if not st.session_state.mhd_data.empty:
+    csv_data = st.session_state.mhd_data.to_csv(index=False)
     st.download_button(
         label="Baixar Tabela como CSV",
-        data=st.session_state.mhd_data.to_csv(index=False),
+        data=csv_data,
         file_name="mhd_xadrez.csv",
         mime="text/csv"
     )
+else:
+    st.info("Nenhum dado disponível para exportação.")
