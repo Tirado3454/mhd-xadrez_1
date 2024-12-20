@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import chess
 import chess.svg
+from streamlit_chessboard import chessboard
 
 # Configuração inicial da interface
 st.set_page_config(page_title="Modelo Hipotético-Dedutivo no Xadrez", layout="centered")
@@ -75,6 +76,18 @@ if st.button("Atualizar Tabuleiro com FEN"):
         st.success("Tabuleiro atualizado com sucesso!")
     except ValueError:
         st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
+
+# Editor de Tabuleiro
+st.markdown("### Editor de Tabuleiro")
+updated_fen = chessboard(
+    "editor",
+    initial_fen=st.session_state.current_board.fen(),
+    theme={"light": "#ffffff", "dark": "#8FBC8F"}
+)
+
+if updated_fen != st.session_state.current_board.fen():
+    st.session_state.current_board.set_fen(updated_fen)
+    st.success("Tabuleiro atualizado a partir do editor.")
 
 # Exibição da tabela dinâmica
 st.subheader("Tabela do Modelo Hipotético-Dedutivo")
