@@ -1,101 +1,48 @@
 import streamlit as st
 import pandas as pd
-import chess
-import chess.svg
 
-# Configura√ß√£o inicial da interface
-st.set_page_config(page_title="Modelo Hipot√©tico-Dedutivo no Xadrez", layout="centered")
-st.markdown("""<h1 style='font-size:32px; display: flex; align-items: center;'>
-<img src='data:image/png;base64,<insira_o_base64_gerado_da_logo_aqui>' style='height:50px; margin-right:10px;'> Modelo Hipot√©tico-Dedutivo no Xadrez
-</h1>""", unsafe_allow_html=True)
-st.write("Configure e salve posi√ß√µes personalizadas no tabuleiro.")
-
-# Inicializa√ß√£o da tabela de dados
-if "mhd_data" not in st.session_state:
-    st.session_state.mhd_data = pd.DataFrame(columns=["Etapa", "Descri√ß√£o", "FEN"])
-
-# Inicializa√ß√£o do tabuleiro
-if "current_board" not in st.session_state:
-    st.session_state.current_board = chess.Board()
-
-# Perguntas norteadoras para cada etapa do MHD
+# DefiniÁ„o das perguntas por etapa
 perguntas = {
-    "Base Te√≥rica": "Qual √© a base de conhecimento ou estrat√©gia que ser√° usada como refer√™ncia?",
-    "Hip√≥tese": "O que voc√™ espera alcan√ßar com uma jogada ou sequ√™ncia de jogadas?",
-    "Consequ√™ncias": "Quais rea√ß√µes ou respostas voc√™ espera do advers√°rio?",
-    "Experimento": "Qual jogada ou sequ√™ncia ser√° aplicada para testar sua hip√≥tese?",
-    "Observa√ß√µes": "O que aconteceu ap√≥s a jogada? O resultado foi o esperado?",
-    "Avalia√ß√£o": "A hip√≥tese inicial foi confirmada, ajustada ou refutada? Por qu√™?"
+    "Base TeÛrica": "Quais s„o os fundamentos teÛricos que embasam sua an·lise?",
+    "HipÛtese": "Qual È a hipÛtese que vocÍ deseja testar?",
+    "ConsequÍncias": "Quais consequÍncias s„o esperadas se a hipÛtese for verdadeira?",
+    "Experimento": "Como vocÍ pretende testar sua hipÛtese?",
+    "ObservaÁıes": "Quais foram os resultados observados?",
+    "AvaliaÁ„o": "Como vocÍ avalia os resultados em relaÁ„o ‡ hipÛtese inicial?"
 }
 
-# Fun√ß√£o para renderizar o tabuleiro com estilo customizado
-def render_tabuleiro_customizado(board):
-    return chess.svg.board(
-        board=board, 
-        size=320,  # Reduzindo o tamanho do tabuleiro (20% menor)
-        style="""
-            .square.light { fill: #ffffff; }  /* Casas claras em branco */
-            .square.dark { fill: #8FBC8F; }  /* Casas escuras em verde */
-        """
-    )
+# InicializaÁ„o do estado da aplicaÁ„o
+if "mhd_data" not in st.session_state:
+    st.session_state.mhd_data = pd.DataFrame(columns=["Etapa", "DescriÁ„o", "FEN"])
 
-# Configura√ß√£o do tabuleiro com FEN
-st.markdown("### Configura√ß√£o do Tabuleiro")
-fen_input = st.text_input(
-    "Insira a nota√ß√£o FEN para configurar o tabuleiro:", 
-    value=st.session_state.current_board.fen()
-)
+if "descricao_etapa" not in st.session_state:
+    st.session_state.descricao_etapa = ""
 
-if st.button("Atualizar Tabuleiro com FEN"):
-    try:
-        st.session_state.current_board.set_fen(fen_input)
-        st.success("Tabuleiro atualizado com sucesso!")
-    except ValueError:
-        st.error("Nota√ß√£o FEN inv√°lida. Por favor, insira uma nota√ß√£o correta.")
+if "current_board" not in st.session_state:
+    from chess import Board
+    st.session_state.current_board = Board()
 
-# Formul√°rio para entrada dos dados
-st.markdown("### Adicionar Nova Etapa")
+# Exibir dica automaticamente ao selecionar a etapa
+etapa_selecionada = st.selectbox("Selecione a Etapa", list(perguntas.keys()), key="etapa_selecionada")
+st.write(f"**Dica:** {perguntas[etapa_selecionada]}")
+
+# Formul·rio para adicionar nova etapa
 with st.form("mhd_form"):
-    etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()))
-    st.markdown(f"**Dica:** {perguntas[etapa]}")  # Atualiza a dica dinamicamente com base na sele√ß√£o
-    descricao = st.text_area("Descreva a etapa:", height=100)
-
-    # Visualizar tabuleiro configurado
-    st.markdown("### Tabuleiro Atual")
-    st.image(render_tabuleiro_customizado(st.session_state.current_board), use_container_width=True)
-
+    descricao = st.text_area("Descreva a etapa:", height=100, key="descricao_etapa")
     submitted = st.form_submit_button("Adicionar Etapa")
     if submitted:
         if descricao.strip():
             nova_entrada = pd.DataFrame({
-                "Etapa": [etapa],
-                "Descri√ß√£o": [descricao],
+                "Etapa": [etapa_selecionada],
+                "DescriÁ„o": [descricao],
                 "FEN": [st.session_state.current_board.fen()]
             })
             st.session_state.mhd_data = pd.concat([st.session_state.mhd_data, nova_entrada], ignore_index=True)
-            st.success(f"Etapa '{etapa}' adicionada com sucesso!")
+            st.session_state["descricao_etapa"] = ""  # Limpar o campo de descriÁ„o
+            st.success(f"Etapa '{etapa_selecionada}' adicionada com sucesso!")
         else:
-            st.error("A descri√ß√£o n√£o pode estar vazia!")
+            st.error("A descriÁ„o n„o pode estar vazia!")
 
-# Exibi√ß√£o da tabela din√¢mica
-st.subheader("Tabela do Modelo Hipot√©tico-Dedutivo")
-if not st.session_state.mhd_data.empty:
-    for index, row in st.session_state.mhd_data.iterrows():
-        st.markdown(f"**Etapa:** {row['Etapa']}")
-        st.markdown(f"**Descri√ß√£o:** {row['Descri√ß√£o']}")
-        st.image(render_tabuleiro_customizado(chess.Board(row['FEN'])), use_column_width=True)
-else:
-    st.info("Nenhuma etapa adicionada ainda.")
-
-# Exportar a tabela para CSV
-st.markdown("### Exporta√ß√£o de Dados")
-if not st.session_state.mhd_data.empty:
-    csv_data = st.session_state.mhd_data.to_csv(index=False)
-    st.download_button(
-        label="Baixar Tabela como CSV",
-        data=csv_data,
-        file_name="mhd_xadrez.csv",
-        mime="text/csv"
-    )
-else:
-    st.info("Nenhum dado dispon√≠vel para exporta√ß√£o.")
+# Exibir dados adicionados
+st.write("### Etapas Adicionadas")
+st.dataframe(st.session_state.mhd_data)
