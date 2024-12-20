@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import chess
 import chess.svg
+import base64
 
 # Configuração inicial da interface
 st.set_page_config(page_title="Modelo Hipotético-Dedutivo no Xadrez", layout="centered")
@@ -37,6 +38,10 @@ def render_tabuleiro_customizado(board):
         """
     )
 
+# Função para converter SVG do tabuleiro em base64
+def svg_to_base64(svg_content):
+    return base64.b64encode(svg_content.encode("utf-8")).decode("utf-8")
+
 # Configuração do tabuleiro com FEN
 st.markdown("### Configuração do Tabuleiro")
 fen_input = st.text_input(
@@ -51,44 +56,42 @@ if st.button("Atualizar Tabuleiro com FEN"):
     except ValueError:
         st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
 
+# Visualizar o tabuleiro configurado
+st.markdown("### Tabuleiro Atual")
+st.image(render_tabuleiro_customizado(st.session_state.current_board), use_column_width=True)
+
 # Formulário para entrada dos dados
 st.markdown("### Adicionar Nova Etapa")
-with st.form("mhd_form"):
-    etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()))
-    st.markdown(f"**Dica:** {perguntas[etapa]}")  # Atualiza a dica dinamicamente com base na seleção
-    descricao = st.text_area("Descreva a etapa:", height=100)
+etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()))
+st.markdown(f"**Dica:** {perguntas[etapa]}")  # Atualiza a dica dinamicamente com base na seleção
+descricao = st.text_area("Descreva a etapa:", height=100)
 
-    # Visualizar tabuleiro configurado
-    st.markdown("### Tabuleiro Atual")
-    st.image(render_tabuleiro_customizado(st.session_state.current_board), use_column_width=True)
-
-    submitted = st.form_submit_button("Adicionar Etapa")
-    if submitted:
-        if descricao.strip():
-            nova_entrada = pd.DataFrame({
-                "Etapa": [etapa],
-                "Descrição": [descricao],
-                "FEN": [st.session_state.current_board.fen()]
-            })
-            st.session_state.mhd_data = pd.concat([st.session_state.mhd_data, nova_entrada], ignore_index=True)
-            st.success(f"Etapa '{etapa}' adicionada com sucesso!")
-        else:
-            st.error("A descrição não pode estar vazia!")
+if st.button("Adicionar Etapa"):
+    if descricao.strip():
+        nova_entrada = pd.DataFrame({
+            "Etapa": [etapa],
+            "Descrição": [descricao],
+            "FEN": [st.session_state.current_board.fen()],
+            "Imagem_Tabuleiro": [
+                f"<img src='data:image/svg+xml;base64,{svg_to_base64(render_tabuleiro_customizado(st.session_state.current_board))}' />"
+            ]
+        })
+        st.session_state.mhd_data = pd.concat([st.session_state.mhd_data, nova_entrada], ignore_index=True)
+        st.success(f"Etapa '{etapa}' adicionada com sucesso!")
+    else:
+        st.error("A descrição não pode estar vazia!")
 
 # Exibição da tabela dinâmica
 st.subheader("Tabela do Modelo Hipotético-Dedutivo")
 if not st.session_state.mhd_data.empty:
-    for index, row in st.session_state.mhd_data.iterrows():
-        st.markdown(f"**Etapa:** {row['Etapa']}")
-        st.markdown(f"**Descrição:** {row['Descrição']}")
-        st.image(render_tabuleiro_customizado(chess.Board(row['FEN'])), use_column_width=True)
+    st.write(st.session_state.mhd_data[["Etapa", "Descrição"]])  # Mostra apenas as colunas relevantes
 else:
     st.info("Nenhuma etapa adicionada ainda.")
 
 # Exportar a tabela para CSV
 st.markdown("### Exportação de Dados")
 if not st.session_state.mhd_data.empty:
-    csv_data = st.session_state.mhd_data.to_csv(index=False)
+    csv_data = st.session_state.mhd_data.drop(columns=["Imagem_Tabuleiro"]).to_csv(index=False)
     st.download_button(
         label="Baixar Tabela como CSV",
         data=csv_data,
