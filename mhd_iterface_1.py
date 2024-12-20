@@ -10,13 +10,15 @@ if "selected_topic" not in st.session_state:
     st.session_state.selected_topic = None
 if "steps_description" not in st.session_state:
     st.session_state.steps_description = ""
+if "board_fen" not in st.session_state:
+    st.session_state.board_fen = chess.Board().fen()
 if "board_rendered" not in st.session_state:
     st.session_state.board_rendered = False
 
 # Função para renderizar o tabuleiro
 @st.cache_data
-def render_chess_board():
-    board = chess.Board()
+def render_chess_board(fen):
+    board = chess.Board(fen)
     return chess.svg.board(board)
 
 # Tópicos do MHD
@@ -51,11 +53,20 @@ if selected_topic != st.session_state.selected_topic:
 steps_description = st.text_area("Descreva as etapas:", value=st.session_state.steps_description, key="steps_description_input")
 st.session_state.steps_description = steps_description
 
+# Editor de posição do tabuleiro
+st.subheader("Editor de Posição do Tabuleiro")
+board_fen = st.text_input("Configure o tabuleiro usando a notação FEN:", value=st.session_state.board_fen, key="board_fen_input")
+if board_fen:
+    try:
+        chess.Board(board_fen)  # Valida a FEN
+        st.session_state.board_fen = board_fen
+    except ValueError:
+        st.error("A notação FEN fornecida é inválida.")
+
 # Botão para adicionar etapas
 if st.button("Adicionar Etapas"):
     st.success("Etapa adicionada com sucesso!")
 
-    # Renderiza o tabuleiro apenas ao adicionar etapas
-    if not st.session_state.board_rendered:
-        st.image(render_chess_board(), use_column_width=True)
-        st.session_state.board_rendered = True
+    # Renderiza o tabuleiro com a posição configurada
+    st.image(render_chess_board(st.session_state.board_fen), use_column_width=True)
+    st.session_state.board_rendered = True
