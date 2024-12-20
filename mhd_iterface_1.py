@@ -55,7 +55,7 @@ if st.button("Atualizar Tabuleiro com FEN"):
 st.markdown("### Adicionar Nova Etapa")
 with st.form("mhd_form"):
     etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()))
-    st.markdown(f"**Dica:** {perguntas[etapa]}")  # Exibe a pergunta norteadora
+    st.markdown(f"**Dica:** {perguntas[etapa]}")  # Atualiza a dica dinamicamente com base na seleção
     descricao = st.text_area("Descreva a etapa:", height=100)
 
     # Visualizar tabuleiro configurado
