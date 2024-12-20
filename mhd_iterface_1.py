@@ -7,7 +7,7 @@ import chess.svg
 # Configuração inicial da interface
 st.set_page_config(page_title="Modelo Hipotético-Dedutivo no Xadrez", layout="centered")
 st.title("♟️ Modelo Hipotético-Dedutivo no Xadrez")
-st.write("Preencha as etapas do método para organizar suas jogadas e estratégias e visualize ou configure o tabuleiro.")
+st.write("Configure e salve posições personalizadas no tabuleiro.")
 
 # Inicialização da tabela de dados
 if "mhd_data" not in st.session_state:
@@ -17,19 +17,10 @@ if "mhd_data" not in st.session_state:
 if "current_board" not in st.session_state:
     st.session_state.current_board = chess.Board()
 
-# Perguntas norteadoras para cada etapa
-perguntas = {
-    "Base Teórica": "Qual é a base de conhecimento ou estratégia que será usada como referência?",
-    "Hipótese": "O que você espera alcançar com uma jogada ou sequência de jogadas?",
-    "Consequências": "Quais reações ou respostas você espera do adversário?",
-    "Experimento": "Qual jogada ou sequência será aplicada para testar sua hipótese?",
-    "Observações": "O que aconteceu após a jogada? O resultado foi o esperado?",
-    "Avaliação": "A hipótese inicial foi confirmada, ajustada ou refutada? Por quê?"
-}
-
-# Configuração inicial do tabuleiro
+# Configuração inicial do tabuleiro com FEN
 st.markdown("### Configuração do Tabuleiro")
 fen_input = st.text_input("Insira a notação FEN para configurar o tabuleiro:", st.session_state.current_board.fen())
+
 if st.button("Atualizar Tabuleiro com FEN"):
     try:
         st.session_state.current_board.set_fen(fen_input)
@@ -39,20 +30,12 @@ if st.button("Atualizar Tabuleiro com FEN"):
 
 # Formulário para entrada dos dados
 with st.form("mhd_form"):
-    etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()))
-    descricao = st.text_area("Responda:", perguntas[etapa], height=100)
+    etapa = st.selectbox("Selecione a Etapa", ["Base Teórica", "Hipótese", "Consequências", "Experimento", "Observações", "Avaliação"])
+    descricao = st.text_area("Descreva a etapa:", height=100)
 
-    # Visualização do tabuleiro atual
+    # Visualizar tabuleiro configurado
     st.markdown("### Tabuleiro Atual")
     st.image(chess.svg.board(board=st.session_state.current_board), use_column_width=True)
-
-    # Movimento do tabuleiro
-    movimento = st.text_input("Faça um movimento (ex.: e2e4):")
-    if movimento:
-        try:
-            st.session_state.current_board.push_san(movimento)
-        except ValueError:
-            st.error("Movimento inválido.")
 
     submitted = st.form_submit_button("Adicionar Etapa")
     if submitted:
@@ -69,7 +52,13 @@ with st.form("mhd_form"):
 
 # Exibição da tabela dinâmica
 st.subheader("Tabela do Modelo Hipotético-Dedutivo")
-st.dataframe(st.session_state.mhd_data, use_container_width=True)
+if not st.session_state.mhd_data.empty:
+    for index, row in st.session_state.mhd_data.iterrows():
+        st.markdown(f"**Etapa:** {row['Etapa']}")
+        st.markdown(f"**Descrição:** {row['Descrição']}")
+        st.image(chess.svg.board(chess.Board(row['FEN'])), use_column_width=True)
+else:
+    st.info("Nenhuma etapa adicionada ainda.")
 
 # Exportar a tabela para CSV
 if not st.session_state.mhd_data.empty:
