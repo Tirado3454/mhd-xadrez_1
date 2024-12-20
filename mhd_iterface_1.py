@@ -30,6 +30,15 @@ if st.button("Atualizar Tabuleiro com FEN"):
     except ValueError:
         st.error("Notação FEN inválida. Por favor, insira uma notação correta.")
 
+# Função para renderizar tabuleiro com estilo customizado
+def render_tabuleiro_customizado(board):
+    svg = chess.svg.board(
+        board=board, 
+        size=320,  # Reduzindo o tamanho do tabuleiro (20% menor)
+        style=".square { fill: #d4f7d4; } .square.black { fill: #a3c3a3; }"
+    )
+    return svg
+
 # Formulário para entrada dos dados
 st.markdown("### Adicionar Nova Etapa")
 with st.form("mhd_form"):
@@ -38,7 +47,7 @@ with st.form("mhd_form"):
 
     # Visualizar tabuleiro configurado
     st.markdown("### Tabuleiro Atual")
-    st.image(chess.svg.board(board=st.session_state.current_board), use_column_width=True)
+    st.image(render_tabuleiro_customizado(st.session_state.current_board), use_column_width=True)
 
     submitted = st.form_submit_button("Adicionar Etapa")
     if submitted:
@@ -59,7 +68,7 @@ if not st.session_state.mhd_data.empty:
     for index, row in st.session_state.mhd_data.iterrows():
         st.markdown(f"**Etapa:** {row['Etapa']}")
         st.markdown(f"**Descrição:** {row['Descrição']}")
-        st.image(chess.svg.board(chess.Board(row['FEN'])), use_column_width=True)
+        st.image(render_tabuleiro_customizado(chess.Board(row['FEN'])), use_column_width=True)
 else:
     st.info("Nenhuma etapa adicionada ainda.")
 
