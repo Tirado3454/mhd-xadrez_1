@@ -58,4 +58,3 @@ if st.session_state.etapas:
         st.write(etapa["descricao"])
 else:
     st.info("Nenhuma etapa adicionada ainda.")
-
