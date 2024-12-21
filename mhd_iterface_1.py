@@ -5,7 +5,9 @@ import chess.svg
 
 # Configuração inicial da interface
 st.set_page_config(page_title="Modelo Hipotético-Dedutivo no Xadrez", layout="centered")
-st.title("?? Modelo Hipotético-Dedutivo no Xadrez")
+st.markdown("""<h1 style='font-size:32px; display: flex; align-items: center;'>
+<img src='data:image/png;base64,<insira_o_base64_gerado_da_logo_aqui>' style='height:50px; margin-right:10px;'> Modelo Hipotético-Dedutivo no Xadrez
+</h1>""", unsafe_allow_html=True)
 st.write("Configure e salve posições personalizadas no tabuleiro.")
 
 # Inicialização da tabela de dados
@@ -16,14 +18,24 @@ if "mhd_data" not in st.session_state:
 if "current_board" not in st.session_state:
     st.session_state.current_board = chess.Board()
 
+# Perguntas norteadoras para cada etapa do MHD
+perguntas = {
+    "Base Teórica": "Qual é a base de conhecimento ou estratégia que será usada como referência?",
+    "Hipótese": "O que você espera alcançar com uma jogada ou sequência de jogadas?",
+    "Consequências": "Quais reações ou respostas você espera do adversário?",
+    "Experimento": "Qual jogada ou sequência será aplicada para testar sua hipótese?",
+    "Observações": "O que aconteceu após a jogada? O resultado foi o esperado?",
+    "Avaliação": "A hipótese inicial foi confirmada, ajustada ou refutada? Por quê?"
+}
+
 # Função para renderizar o tabuleiro com estilo customizado
 def render_tabuleiro_customizado(board):
     return chess.svg.board(
         board=board, 
         size=320,  # Reduzindo o tamanho do tabuleiro (20% menor)
         style="""
-            .square { fill: #d4f7d4; }  /* Cor verde claro para casas brancas */
-            .square.black { fill: #a3c3a3; }  /* Verde mais escuro para casas pretas */
+            .square.light { fill: #ffffff; }  /* Casas claras em branco */
+            .square.dark { fill: #8FBC8F; }  /* Casas escuras em verde */
         """
     )
 
@@ -44,12 +56,13 @@ if st.button("Atualizar Tabuleiro com FEN"):
 # Formulário para entrada dos dados
 st.markdown("### Adicionar Nova Etapa")
 with st.form("mhd_form"):
-    etapa = st.selectbox("Selecione a Etapa", ["Base Teórica", "Hipótese", "Consequências", "Experimento", "Observações", "Avaliação"])
+    etapa = st.selectbox("Selecione a Etapa", list(perguntas.keys()))
+    st.markdown(f"**Dica:** {perguntas[etapa]}")  # Atualiza a dica dinamicamente com base na seleção
     descricao = st.text_area("Descreva a etapa:", height=100)
 
     # Visualizar tabuleiro configurado
     st.markdown("### Tabuleiro Atual")
-    st.image(render_tabuleiro_customizado(st.session_state.current_board), use_column_width=True)
+    st.image(render_tabuleiro_customizado(st.session_state.current_board), use_container_width=True)
 
     submitted = st.form_submit_button("Adicionar Etapa")
     if submitted:
