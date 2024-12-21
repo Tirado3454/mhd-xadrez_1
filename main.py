@@ -5,6 +5,8 @@ if "etapas" not in st.session_state:
     st.session_state.etapas = []
 if "descricao_etapa" not in st.session_state:
     st.session_state.descricao_etapa = ""
+if "topico_selecionado" not in st.session_state:
+    st.session_state.topico_selecionado = ""
 
 # Função para adicionar etapa
 def adicionar_etapa():
@@ -25,7 +27,7 @@ st.header("Etapas do Modelo Hipotético-Dedutivo")
 st.subheader("Tópicos do MHD")
 topicos_mhd = ["Base Teórica", "Observação", "Formulação de Hipóteses", "Dedução", "Teste por Experimento", "Análise dos Resultados", "Conclusão"]
 st.session_state.topico_selecionado = st.selectbox(
-    "Selecione um tópico do MHD:", topicos_mhd
+    "Selecione um tópico do MHD:", topicos_mhd, index=0
 )
 
 # Exibir dica com base no tópico selecionado
