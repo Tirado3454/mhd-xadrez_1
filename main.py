@@ -38,7 +38,8 @@ dicas = {
     "Análise dos Resultados": "Analise os dados obtidos para validar ou refutar a hipótese.",
     "Conclusão": "Elabore uma conclusão baseada nas observações e experimentos realizados."
 }
-st.info(dicas[st.session_state.topico_selecionado])
+if st.session_state.topico_selecionado in dicas:
+    st.info(dicas[st.session_state.topico_selecionado])
 
 # Campo para descrição da etapa
 st.subheader("Descreva a etapa")
